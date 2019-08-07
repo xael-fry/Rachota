@@ -119,8 +119,8 @@ public class MainWindow extends javax.swing.JFrame implements PropertyChangeList
         if (printHelp) {
             infoString += "\n\nHelp: java [-Duser.language=<language_id> -Duser.country=<country_id>] -jar rachota_22.jar [-userdir=<diary_folder>] where:";
             infoString += "\n      <diary_folder> is directory with settings and diary files e.g. C:\\rachota\\diaries";
-            infoString += "\n      <language_id> is Java language code e.g. cs, de, en, es, fr, hu, it, ja, nl, pt, ro or ru";
-            infoString += "\n      <country_id> is Java country code e.g. BR, CZ, DE, ES, FR, HU, IT, JP, MX, NL, RO, RU or US";
+            infoString += "\n      <language_id> is Java language code e.g. cs, de, en, es, hu, it, ja, pt, ro or ru";
+            infoString += "\n      <country_id> is Java country code e.g. BR, CZ, DE, ES, HU, IT, JP, MX, RO, RU or US";
             infoString += "\n      java -Duser.language=cs -Duser.country=CZ -jar Rachota.jar -userdir=/home/jkovalsky/diaries";
         }
         Logger.getLogger(MainWindow.class.getName()).info(infoString);
@@ -964,12 +964,24 @@ private void formWindowIconified(java.awt.event.WindowEvent evt) {//GEN-FIRST:ev
     }
     
     /** Returns whether system tray icon should be created or not.
-     * @return False if Rachota enable.systemtray setting is set to false. True otherwise.
+     * @return False if Rachota is not running on Java 6 or newer. True otherwise.
      */
     private boolean enableSystemTray() {
         Boolean enableSystemTray = (Boolean) Settings.getDefault().getSetting("enable.systemtray");
-        if (enableSystemTray == null) enableSystemTray = new Boolean(true);
-        return enableSystemTray.booleanValue();
+        if (enableSystemTray == null) enableSystemTray = Boolean.TRUE;
+        if (enableSystemTray) {
+            String javaVersion = System.getProperty("java.version");
+            if(javaVersion.startsWith("1.")) {
+                javaVersion = javaVersion.substring(2, 3);
+            } else {
+                int dot = javaVersion.indexOf(".");
+                if(dot != -1) {
+                    javaVersion = javaVersion.substring(0, dot); }
+            }
+            int version = Integer.parseInt(javaVersion);
+            return version > 5;
+        }
+        return false;
     }
     
     /** Checks whether another instance of Rachota is running or Rachota was not
